@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
-from camp.models import Site, Profile
+from camp.models import Site
 # Create your models here.
 
-class notice(models.Model) :
+class Notice(models.Model) :
     """
         공지 사항
     """
