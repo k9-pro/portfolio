@@ -1,5 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,AbstractUser
+
+# from .managers import CustomUserManager
 
 
 class Location(models.Model) :
@@ -33,7 +35,7 @@ class Site(models.Model) :
         무료 캠핑장 정보 테이블
     """
     location = models.ForeignKey(Location, on_delete=models.CASCADE, help_text='지역 FK')
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, help_text='프로필 FK')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     name = models.CharField(max_length=150, help_text='캠핑장명', db_index=True)
     address = models.CharField(max_length=150, help_text='상세주소')
     is_state = models.CharField(
