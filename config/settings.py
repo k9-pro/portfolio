@@ -22,12 +22,12 @@ ROOT_DIR = os.path.dirname(BASE_DIR)
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-j3ulpq=(s%*^&uw@gjfd+9o#d27yj-wqkb#@z2ponx(u5_%0lt'
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'django-insecure-j3ulpq=(s%*^&uw@gjfd+9o#d27yj-wqkb#@z2ponx(u5_%0lt'
+# SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = os.getenv('DEBUG')
+DEBUG = True
+# DEBUG = os.getenv('DEBUG')
 #접근권한 전체 허용
 ALLOWED_HOSTS = ['*']
 
