@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import testAPI, CampData
+from .views import CampData
 
 router = routers.DefaultRouter()
 router.register(r'',CampData)
