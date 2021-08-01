@@ -41,8 +41,17 @@ INSTALLED_APPS = [
     'camp',
     'board',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_comment_migrate',
+    'rest_auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
+    'drf_yasg',
+    'django_filters',
 ]
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -146,5 +155,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'PAGE_SIZE': 10
 }
+
+SWAGGER_SETTINGS = {"DEFAULT_AUTO_SCHEMA_CLASS":"config.views.CustomAutoSchema"}
