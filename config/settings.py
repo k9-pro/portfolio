@@ -148,12 +148,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_DIR= os.path.join(BASE_DIR, 'static')
-
+STATIC_ROOT = STATIC_DIR
 STATICFILES_DIRS = [
-    STATIC_DIR,
+    os.path.join(ROOT_DIR, 'static_root'),
 ]
 
-STATIC_ROOT = os.path.join(ROOT_DIR, 'static_root')
+# STATIC_ROOT = os.path.join(ROOT_DIR, 'static_root')
 
 #정적파일 관리에 대한 코드
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
