@@ -37,16 +37,23 @@ class UserSerializer(DynamicFieldsModelSerializer) :
 class LocationSerializer(serializers.ModelSerializer) :
     class Meta :
         model = Location
-        fields = ('name',)
+        fields = ('id','name',)
 
 class WriteCampSerializer(serializers.ModelSerializer) :
-
+    """
+        캠핑장 정보 등록/수정
+        ___
+    """
     # location = serializers.SlugRelatedField(slug_field='location_id', queryset=Location.objects.all())
     class Meta :
         model = Site
-        fields = ('name', 'note', 'address', 'is_state', 'created_at', 'updated_at')
+        fields = ('location','name', 'note', 'address', 'is_state', 'created_at', 'updated_at')
 
 class ReadCampSerializer(DynamicFieldsModelSerializer) :
+    """
+        캠핑장 정보 조회
+        ___
+    """
     user = UserSerializer()
     location = LocationSerializer()
     class Meta :
