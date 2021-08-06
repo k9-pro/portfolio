@@ -2,9 +2,9 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import Site
-from .serializers import ReadCampSerializer, WriteCampSerializer
-
+from .models import Site,Location
+from .serializers import ReadCampSerializer, WriteCampSerializer, LocationSerializer
+from drf_yasg.utils import swagger_auto_schema
 # Create your views here.
 # @api_view(['GET'])
 # def testAPI(request):
@@ -12,9 +12,9 @@ from .serializers import ReadCampSerializer, WriteCampSerializer
 
 
 
-class CampData(viewsets.ModelViewSet):
+class CampData(viewsets.ModelViewSet) :
     """
-        캠핑장 정보
+        캠핑장 정보 CRUD
     """
     """
         select_related : 사용하려는 객체가 정참조(다른 객체의 ForeignKey를 가지고 있음) 혹은
@@ -34,3 +34,16 @@ class CampData(viewsets.ModelViewSet):
         return WriteCampSerializer
         # serializer_class = ReadCampSerializer
 
+
+@swagger_auto_schema(
+    method='get',
+    tags=['지역 정보'],
+)
+@api_view(['GET'])
+def LocationData(request) :
+    """
+        지역 정보 조회
+    """
+    queryset = Location.objects.all()
+    serializer = LocationSerializer(queryset, many=True)
+    return Response(serializer.data)
