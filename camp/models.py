@@ -37,6 +37,7 @@ class Site(models.Model) :
     location = models.ForeignKey(Location, on_delete=models.CASCADE, help_text='지역 FK')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     name = models.CharField(max_length=150, help_text='캠핑장명', db_index=True)
+    photo = models.ImageField(default='media/default.jpg', help_text="대표이미지")
     address = models.CharField(max_length=150, help_text='상세주소')
     is_state = models.CharField(
         max_length=5,
