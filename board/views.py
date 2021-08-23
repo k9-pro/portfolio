@@ -21,7 +21,7 @@ class PostData(viewsets.ModelViewSet) :
     filter_backends = [SearchFilter, OrderingFilter,filters.DjangoFilterBackend]
     filterset_fields = ['site',] #사이트 종속 필터
     search_fields = ['title', 'content', 'user__username'] # full word search filter
-    ordering_fields = ["-created_at"] # 정렬
+    ordering_fields = ["created_at"] # 정렬
 
     my_tags = ["후기"] # swagger tag
 
@@ -45,7 +45,7 @@ class PostCommentData(viewsets.ModelViewSet) :
     queryset = Post_comment.objects.select_related("post", "user")
     filter_backends = [filters.DjangoFilterBackend]
     filterset_fields = ['post', ]  # 후기 종속 필터
-    ordering_fields = ["-created_at"]  # 정렬
+    ordering_fields = ["created_at"]  # 정렬
 
     my_tags = ["후기 댓글"]  # swagger tag
 
@@ -66,7 +66,7 @@ class PostReplyData(viewsets.ModelViewSet) :
     queryset = Post_reply.objects.select_related("post_comment", "user")
     filter_backends = [filters.DjangoFilterBackend]
     filterset_fields = ['post_comment', ]  # 후기 댓글 종속 필터
-    ordering_fields = ["-created_at"]  # 정렬
+    ordering_fields = ["created_at"]  # 정렬
 
     my_tags = ["후기 댓글 답변"]  # swagger tag
 
@@ -90,7 +90,7 @@ class NoticeData(viewsets.ModelViewSet) :
     filter_backends = [SearchFilter, OrderingFilter, filters.DjangoFilterBackend]
     filterset_fields = ['site', ]  # 사이트 종속 필터
     search_fields = ['title', 'content', 'user__username']  # full word search filter
-    ordering_fields = ["-created_at"]  # 정렬
+    ordering_fields = ["created_at"]  # 정렬
 
     my_tags = ["공지사항"] # swagger tag
 
@@ -116,7 +116,7 @@ class FreeData(viewsets.ModelViewSet) :
     filter_backends = [SearchFilter, OrderingFilter, filters.DjangoFilterBackend]
     filterset_fields = ['site', ]  # 사이트 종속 필터
     search_fields = ['title', 'content', 'user__username']  # full word search filter
-    ordering_fields = ["-created_at"]  # 정렬
+    ordering_fields = ["created_at"]  # 정렬
 
     my_tags = ["자유게시판"] # swagger tag
 
@@ -140,7 +140,7 @@ class FreeCommentData(viewsets.ModelViewSet) :
     filter_backends = [filters.DjangoFilterBackend]
     filterset_fields = ["free"]  # 자유게시판 종속 필터
 
-    ordering_fields = ["-created_at"]  # 정렬
+    ordering_fields = ["created_at"]  # 정렬
 
     my_tags = ["자유게시판 댓글"]  # swagger tag
 
@@ -162,7 +162,7 @@ class FreeReplyData(viewsets.ModelViewSet) :
     queryset = Free_reply.objects.select_related("free_comment", "user")
     filter_backends = [filters.DjangoFilterBackend]
     filterset_fields = ['free_comment', ]  # 지유게시판 댓글 종속 필터
-    ordering_fields = ["-created_at"]  # 정렬
+    ordering_fields = ["created_at"]  # 정렬
 
     my_tags = ["자유게시판 댓글 답변"]  # swagger tag
 
