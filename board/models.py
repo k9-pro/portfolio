@@ -11,13 +11,23 @@ class Notice(models.Model) :
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     title = models.CharField(max_length=150, help_text='제목', db_index=True)
     content = models.TextField(null=True, blank=True, help_text='내용')
-    hit = models.IntegerField(default=0, help_text='조회수')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
     updated_at = models.DateTimeField(auto_now=True, help_text='수정일시')
     deleted_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self) :
         return self.title
+
+class Notice_hit(models.Model) :
+    """
+        공지사항 조회기록
+    """
+    notice = models.ForeignKey(Notice, on_delete=models.CASCADE, help_text='공지사항 FK')
+    ip = models.IPAddressField(protocol='IPv4', db_index=True, help_text='IP')
+    created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
+
+    def __str__(self) :
+        return self.ip
 
 class Post(models.Model) :
     """
@@ -27,14 +37,32 @@ class Post(models.Model) :
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     title = models.CharField(max_length=150, help_text='제목', db_index=True)
     content = models.TextField(null=True, blank=True, help_text='내용')
-    hit = models.IntegerField(default=0, help_text='조회수')
-    good = models.IntegerField(default=0, help_text='추천수', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
     updated_at = models.DateTimeField(auto_now=True, help_text='수정일시')
     deleted_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self) :
         return self.title
+
+class Post_hit(models.Model) :
+    """
+        후기 조회기록
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, help_text='후기 FK')
+    ip = models.IPAddressField(protocol='IPv4', db_index=True, help_text='IP')
+    created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
+
+    def __str__(self) :
+        return self.ip
+
+class Post_good(models.Model) :
+    """
+        후기 조회기록
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, help_text='후기 FK')
+    user = models.ForeignKey(User, help_text='작성자 FK')
+    created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
+
 
 class Post_comment(models.Model) :
     """
@@ -74,7 +102,6 @@ class Free(models.Model) :
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     title = models.CharField(max_length=150, help_text='제목', db_index=True)
     content = models.TextField(null=True, blank=True, help_text='내용')
-    hit = models.IntegerField(default=0, help_text='조회수')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
     updated_at = models.DateTimeField(auto_now=True, help_text='수정일시')
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -82,6 +109,16 @@ class Free(models.Model) :
     def __str__(self) :
         return self.title
 
+class Free_hit(models.Model) :
+    """
+        후기 조회기록
+    """
+    free = models.ForeignKey(Free, on_delete=models.CASCADE, help_text='자유게시판 FK')
+    ip = models.IPAddressField(protocol='IPv4', db_index=True, help_text='IP')
+    created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
+
+    def __str__(self) :
+        return self.ip
 
 class Free_comment(models.Model):
     """
