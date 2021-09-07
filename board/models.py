@@ -22,8 +22,8 @@ class Notice_hit(models.Model) :
     """
         공지사항 조회기록
     """
-    notice = models.ForeignKey(Notice, on_delete=models.CASCADE, help_text='공지사항 FK')
-    ip = models.IPAddressField(protocol='IPv4', db_index=True, help_text='IP')
+    notice = models.ForeignKey(Notice, related_name='children', on_delete=models.CASCADE, help_text='공지사항 FK')
+    ip = models.GenericIPAddressField(db_index=True, help_text='IP')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
 
     def __str__(self) :
@@ -36,6 +36,7 @@ class Post(models.Model) :
     site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text='캠핑장정보 FK')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     title = models.CharField(max_length=150, help_text='제목', db_index=True)
+    photo = models.CharField(max_length=100, null=True, help_text="대표이미지")
     content = models.TextField(null=True, blank=True, help_text='내용')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
     updated_at = models.DateTimeField(auto_now=True, help_text='수정일시')
@@ -48,8 +49,8 @@ class Post_hit(models.Model) :
     """
         후기 조회기록
     """
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, help_text='후기 FK')
-    ip = models.IPAddressField(protocol='IPv4', db_index=True, help_text='IP')
+    post = models.ForeignKey(Post, related_name='children_hit', on_delete=models.CASCADE, help_text='후기 FK')
+    ip = models.GenericIPAddressField(db_index=True, help_text='IP')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
 
     def __str__(self) :
@@ -57,10 +58,10 @@ class Post_hit(models.Model) :
 
 class Post_good(models.Model) :
     """
-        후기 조회기록
+        후기 추천기록
     """
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, help_text='후기 FK')
-    user = models.ForeignKey(User, help_text='작성자 FK')
+    post = models.ForeignKey(Post, related_name='children_good', on_delete=models.CASCADE, help_text='후기 FK')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
 
 
@@ -82,7 +83,7 @@ class Post_reply(models.Model) :
     """
         후기 댓글 답변
     """
-    post_comment = models.ForeignKey(Post_comment, on_delete=models.CASCADE, help_text='후기 댓글 FK')
+    post_comment = models.ForeignKey(Post_comment, related_name='children_post_reply', on_delete=models.CASCADE, help_text='후기 댓글 FK')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     content = models.TextField(help_text='내용')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
@@ -111,10 +112,10 @@ class Free(models.Model) :
 
 class Free_hit(models.Model) :
     """
-        후기 조회기록
+        자유게시판 조회기록
     """
-    free = models.ForeignKey(Free, on_delete=models.CASCADE, help_text='자유게시판 FK')
-    ip = models.IPAddressField(protocol='IPv4', db_index=True, help_text='IP')
+    free = models.ForeignKey(Free, related_name='children', on_delete=models.CASCADE, help_text='자유게시판 FK')
+    ip = models.GenericIPAddressField(db_index=True, help_text='IP')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
 
     def __str__(self) :
@@ -139,7 +140,7 @@ class Free_reply(models.Model):
     """
         자유게시판 댓글 답변
     """
-    free_comment = models.ForeignKey(Free_comment, on_delete=models.CASCADE, help_text='자유게시판 댓글 FK')
+    free_comment = models.ForeignKey(Free_comment, related_name='children_free_reply', on_delete=models.CASCADE, help_text='자유게시판 댓글 FK')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     content = models.TextField(help_text='내용')
     created_at = models.DateTimeField(auto_now_add=True, help_text='생성일시')
