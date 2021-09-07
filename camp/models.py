@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User,AbstractUser
+from django.contrib.postgres.fields import JSONField
 
 # from .managers import CustomUserManager
 
@@ -37,8 +38,9 @@ class Site(models.Model) :
     location = models.ForeignKey(Location, on_delete=models.CASCADE, help_text='지역 FK')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='작성자 FK')
     name = models.CharField(max_length=150, help_text='캠핑장명', db_index=True)
-    photo = models.ImageField(default='default.jpg', help_text="대표이미지")
+    photo = models.ImageField(default='default.jpeg', help_text="대표이미지")
     address = models.CharField(max_length=150, help_text='상세주소')
+    weather = JSONField(blank=True, null=True, help_text='날씨API 연동하기 위한 위경도 정보')
     is_state = models.CharField(
         max_length=5,
         choices=[('OPEN', 'OPEN'), ('CLOSE', 'CLOSE')],
