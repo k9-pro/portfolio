@@ -2,8 +2,30 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from camp.models import Site, Location, Profile
 from camp.serializers import ReadCampSerializer,UserSerializer
-from .models import Post,Notice,Free,Post_comment,Free_comment,Post_reply,Free_reply
+from django.db.models import F
+from .models import Post,Notice,Notice_hit,Free,Post_comment,Free_comment,Post_reply,Free_reply,Free_hit,Post_hit,Post_good
 
+"""
+    베스트 후기
+"""
+class BastPostSerializer(serializers.ModelSerializer) :
+    # class Meta :
+        # model = Post_good
+
+        # count =
+        # fields = ('user_id')
+    site = ReadCampSerializer(Site, fields=('id','name',))
+    user = UserSerializer(User, fields=('username',))
+
+    good_count = serializers.SerializerMethodField()
+
+    class Meta :
+        model = Post
+        fields = ('id', 'site', 'user', 'good_count', 'photo', 'title', 'content', 'created_at')
+        # ordering = ["created_at"]
+
+    def get_good_count(self, obj):
+        return obj.children_good.values('user_id','post_id').distinct().count()
 
 """
     후기 
@@ -14,11 +36,25 @@ class ReadPostSerializer(serializers.ModelSerializer) :
         ___
     """
     site = ReadCampSerializer(Site, fields=('id','name',))
-    user = UserSerializer(User, fields=('username',))
+    user = UserSerializer(User, fields=('username','id'))
+
+    hit = serializers.SerializerMethodField()
+    good = serializers.SerializerMethodField()
+    good_count = serializers.SerializerMethodField()
 
     class Meta :
         model = Post
-        fields = ('id','site','user','title','content','hit','good','created_at')
+        fields = ('id', 'site', 'user', 'hit', 'good', 'good_count', 'photo', 'title', 'content', 'created_at')
+        # ordering = ["created_at"]
+
+    def get_hit(self, obj):
+        return obj.children_hit.values('ip','post_id').distinct().count()
+
+    def get_good(self, obj):
+        return obj.children_good.values('user_id','post_id').distinct()
+
+    def get_good_count(self, obj):
+        return obj.children_good.values('user_id','post_id').distinct().count()
 
 class CreatePostSerializer(serializers.ModelSerializer) :
     """
@@ -27,7 +63,7 @@ class CreatePostSerializer(serializers.ModelSerializer) :
     """
     class Meta :
         model = Post
-        fields = ('site','user','title','content')
+        fields = ('site','user','title','photo','content')
 
 class UpdatePostSerializer(serializers.ModelSerializer) :
     """
@@ -36,7 +72,7 @@ class UpdatePostSerializer(serializers.ModelSerializer) :
     """
     class Meta :
         model = Post
-        fields = ('title','content')
+        fields = ('title','content','photo')
 
 class PatchPostSerializer(serializers.ModelSerializer) :
     """
@@ -45,7 +81,7 @@ class PatchPostSerializer(serializers.ModelSerializer) :
     """
     class Meta :
         model = Post
-        fields = ('title','content','hit','good')
+        fields = ('title','content','photo')
 
 
 """
@@ -56,11 +92,15 @@ class ReadPostCommentSerializer(serializers.ModelSerializer) :
         후기 댓글 조회
         ___
     """
-    user = UserSerializer(User, fields=('username',))
+    user = UserSerializer(User, fields=('id','username',))
+    reply = serializers.SerializerMethodField()
 
     class Meta :
         model = Post_comment
-        fields = ('id','post','user','content','created_at')
+        fields = ('id','post','user', 'reply', 'content','created_at')
+
+    def get_reply(self, obj):
+        return obj.children_post_reply.annotate(username = F('user__username'), userid = F('user__id')).values('id', 'userid', 'username','content','created_at')
 
 class CreatePostCommentSerializer(serializers.ModelSerializer) :
     """
@@ -115,6 +155,65 @@ class UpdatePostReplySerializer(serializers.ModelSerializer) :
 
 
 """
+    후기 조회 기록
+"""
+class ReadPostHitSerializer(serializers.ModelSerializer) :
+    """
+        후기 조회기록 조회
+        ___
+    """
+
+    class Meta :
+        model = Post_hit
+        fields = ('id','ip','created_at')
+
+class CreatePostHitSerializer(serializers.ModelSerializer) :
+    """
+        후기 조회기록 등록
+        ---
+    """
+    class Meta :
+        model = Post_hit
+        fields = ('post','ip')
+        read_only_fields = ('ip',)
+
+    def create(self, validated_data):
+        x_forwarded_for = self.context.get('request').META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            validated_data['ip'] = x_forwarded_for.split(',')[0]
+        else:
+            validated_data['ip'] = self.context.get('request').META.get("REMOTE_ADDR")
+
+        return Post_hit.objects.create(**validated_data)
+
+
+"""
+    후기 추천 기록
+"""
+class ReadPostGoodSerializer(serializers.ModelSerializer) :
+    """
+        후기 추천 기록 조회
+        ___
+    """
+
+    class Meta :
+        model = Post_good
+        fields = ('id','user_id','post_id','created_at')
+
+class CreatePostGoodSerializer(serializers.ModelSerializer) :
+    """
+        후기 추천 기록 등록
+        ---
+    """
+    class Meta :
+        model = Post_good
+        fields = ('post','user')
+
+
+
+
+
+"""
     공지 사항
 """
 class ReadNoticeSerializer(serializers.ModelSerializer) :
@@ -123,11 +222,18 @@ class ReadNoticeSerializer(serializers.ModelSerializer) :
         ___
     """
     site = ReadCampSerializer(Site, fields=('name',))
-    user = UserSerializer(User, fields=('username',))
+    user = UserSerializer(User, fields=('username','id'))
+    # children = ReadNoticeHitSerializer(many=True, read_only=True)
+
+    hit = serializers.SerializerMethodField()
 
     class Meta :
         model = Notice
-        fields = ('id','site','user','title','content','hit','created_at')
+        fields = ('id','site','user', 'hit','title','content','created_at')
+
+    def get_hit(self, obj):
+        return obj.children.values('ip','notice_id').distinct().count()
+
 
 class CreateNoticeSerializer(serializers.ModelSerializer) :
     """
@@ -154,7 +260,41 @@ class PatchNoticeSerializer(serializers.ModelSerializer) :
     """
     class Meta :
         model = Notice
-        fields = ('title','content','hit')
+        fields = ('title','content')
+
+
+"""
+    공지 사항 조회 기록
+"""
+class ReadNoticeHitSerializer(serializers.ModelSerializer) :
+    """
+        공지사항 조회기록 조회
+        ___
+    """
+
+    class Meta :
+        model = Notice_hit
+        fields = ('id','ip','created_at')
+
+
+class CreateNoticeHitSerializer(serializers.ModelSerializer) :
+    """
+        공지사항 조회기록 등록
+        ---
+    """
+    class Meta :
+        model = Notice_hit
+        fields = ('notice','ip')
+        read_only_fields = ('ip',)
+
+    def create(self, validated_data):
+        x_forwarded_for = self.context.get('request').META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            validated_data['ip'] = x_forwarded_for.split(',')[0]
+        else:
+            validated_data['ip'] = self.context.get('request').META.get("REMOTE_ADDR")
+
+        return Notice_hit.objects.create(**validated_data)
 
 
 
@@ -167,11 +307,16 @@ class ReadFreeSerializer(serializers.ModelSerializer) :
         ___
     """
     site = ReadCampSerializer(Site, fields=('name',))
-    user = UserSerializer(User, fields=('username',))
+    user = UserSerializer(User, fields=('username','id'))
+
+    hit = serializers.SerializerMethodField()
 
     class Meta :
         model = Free
-        fields = ('id','site','user','title','content','hit','created_at')
+        fields = ('id', 'site', 'user', 'hit', 'title', 'content', 'created_at')
+
+    def get_hit(self, obj):
+        return obj.children.values('ip','free_id').distinct().count()
 
 class CreateFreeSerializer(serializers.ModelSerializer) :
     """
@@ -198,7 +343,7 @@ class PatchFreeSerializer(serializers.ModelSerializer) :
     """
     class Meta :
         model = Free
-        fields = ('title','content','hit')
+        fields = ('title','content')
 
 
 """
@@ -209,11 +354,17 @@ class ReadFreeCommentSerializer(serializers.ModelSerializer) :
         자유게시판 댓글 조회
         ___
     """
-    user = UserSerializer(User, fields=('username',))
+    user = UserSerializer(User, fields=('id', 'username',))
+    reply = serializers.SerializerMethodField()
 
     class Meta :
         model = Free_comment
-        fields = ('id','free','user','content','created_at')
+        fields = ('id','free','user', 'reply', 'content', 'created_at')
+
+    def get_reply(self, obj):
+        return obj.children_free_reply.annotate(username = F('user__username'), userid = F('user__id')).values('id', 'userid', 'username','content','created_at')
+
+
 
 class CreateFreeCommentSerializer(serializers.ModelSerializer) :
     """
@@ -265,3 +416,36 @@ class UpdateFreeReplySerializer(serializers.ModelSerializer) :
     class Meta :
         model = Free_reply
         fields = ('content',)
+
+
+"""
+    자유게시판 사항 조회 기록
+"""
+class ReadFreeHitSerializer(serializers.ModelSerializer) :
+    """
+        자유게시판 조회기록 조회
+        ___
+    """
+
+    class Meta :
+        model = Free_hit
+        fields = ('id','ip','created_at')
+
+class CreateFreeHitSerializer(serializers.ModelSerializer) :
+    """
+        자유게시판 조회기록 등록
+        ---
+    """
+    class Meta :
+        model = Free_hit
+        fields = ('free','ip')
+        read_only_fields = ('ip',)
+
+    def create(self, validated_data):
+        x_forwarded_for = self.context.get('request').META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            validated_data['ip'] = x_forwarded_for.split(',')[0]
+        else:
+            validated_data['ip'] = self.context.get('request').META.get("REMOTE_ADDR")
+
+        return Free_hit.objects.create(**validated_data)
