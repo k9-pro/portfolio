@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,8 +27,8 @@ SECRET_KEY = 'django-insecure-j3ulpq=(s%*^&uw@gjfd+9o#d27yj-wqkb#@z2ponx(u5_%0lt
 # SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG = os.getenv('DEBUG')
+# DEBUG = False
+DEBUG = os.environ.get('ENV','DEBUG')
 #접근권한 전체 허용
 ALLOWED_HOSTS = ['*']
 
@@ -45,15 +46,24 @@ INSTALLED_APPS = [
     'board',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
     'django_comment_migrate',
-    'rest_auth',
+    # 'rest_auth',
     'django.contrib.sites',
+
+    # allauth
     'allauth',
     'allauth.account',
-    'rest_auth.registration',
+    # Django REST auth
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
+    # 'rest_auth.registration',
     'drf_yasg',
     'django_filters',
 ]
+AUTH_USER_MODEL = 'auth.User'
+
 SITE_ID = 1
 
 MIDDLEWARE = [
@@ -64,9 +74,19 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # 'config.middleware.MoveJWTCookieIntoTheBody',
+    # 'config.middleware.MoveJWTRefreshCookieIntoTheBody',
+]
+
+MIDDLEWARE_CLASSES = [
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 ROOT_URLCONF = 'config.urls'
+LANGUAGE_CODE = 'ko-kr'
+# LOCALE_PATHS = 'ko'
+# LANGUAGE_CODE = 'en-us'
 
 TEMPLATES = [
     {
@@ -127,11 +147,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# ACCOUNT_USERNAME_VALIDATORS = 'config.module.validators.custom_username_validators'
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'camp.serializers.UserSerializer',
+    'USER_LOGIN_SERIALIZER': 'camp.serializers.CustomLoginSerializer'
+}
+# REST_AUTH_REGISTER_SERIALIZERS = {
+#     'REGISTER_SERIALIZER': 'camp.serializers.CustomRegisterSerializer',
+# }
+
+
 
 #대한민국 시간설정
 TIME_ZONE = 'Asia/Seoul'
@@ -140,19 +167,21 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/images/'
 STATIC_DIR= os.path.join(BASE_DIR, 'static')
 STATIC_ROOT = STATIC_DIR
 STATICFILES_DIRS = [
 ]
 
-# STATIC_ROOT = os.path.join(ROOT_DIR, 'static_root')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+
 
 #정적파일 관리에 대한 코드
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -166,7 +195,56 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
+    'DEFAULT_PERMISSION_CLASSES': (
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ]
 }
 
-SWAGGER_SETTINGS = {"DEFAULT_AUTO_SCHEMA_CLASS":"config.views.CustomAutoSchema"}
+SWAGGER_SETTINGS = {
+    "DEFAULT_AUTO_SCHEMA_CLASS":"config.views.CustomAutoSchema"
+}
+
+
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = None #username 필드를 사용하지 않을 경우 사용
+ACCOUNT_AUTHENTICATION_METHOD = 'email' # 인증 필드 설정
+ACCOUNT_EMAIL_REQUIRED = True # 이메일 필드 필수
+ACCOUNT_USERNAME_REQUIRED = False # username 필드 필수
+ACCOUNT_UNIQUE_EMAIL = True # 이메일 필드 유니크
+ACCOUNT_EMAIL_VERIFICATION = 'none' #이메일 인증방식 사용안함
+ACCOUNT_LOGOUT_ON_GET = True
+
+#This is required otherwise it asks for email server
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+REST_USE_JWT = True
+# JWT_AUTH_COOKIE = 'bCPRgXYqpW0Xh54T8xjz5NZKC9g3qnkOceTj4aLVs4J2XDI8i32kuOn27IXQi6HN'
+# JWT_AUTH_REFRESH_COOKIE = 'bCPRgXYqpW0Xh54T8xjz5NZKC9g3qnkOceTj4aLVs4J2XDI8i32kuOn27IXQi6HN'
+# JWT_AUTH_LOGOUT_COOKIE = 'bCPRgXYqpW0Xh54T8xjz5NZKC9g3qnkOceTj4aLVs4J2XDI8i32kuOn27IXQi6HN'
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2), #access토큰 만료기간 (seconds, hours, minutes, days 단위 설정가능)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7), #refresh토큰 만료기간 (seconds, hours, minutes, days 단위 설정가능)
+    'ROTATE_REFRESH_TOKENS': True, #토큰 재발급 관련 설정
+    'BLACKLIST_AFTER_ROTATION': True, #보안 - 더이상 필요없는 토큰이나 악의적으로 탈취된 토큰을 서버에서 사용할 수 없도록 관리
+}
+
+
+#Following is added to enable registration with email instead of username
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
+LOGIN_URL = '/accounts/login/'
+# LOGOUT_URL = '/rest-auth/logout/'
