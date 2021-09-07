@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Site, Location, Profile
+from dj_rest_auth.serializers import LoginSerializer
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """
@@ -25,13 +26,21 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer) :
     class Meta :
         model = Profile
-        fields = ('alias', 'gender')
+        fields = ('gender',)
+
+
+class CustomLoginSerializer(LoginSerializer) :
+    class Meta :
+        model = User
+        fields = ( 'email', 'password' )
+
+
 
 class UserSerializer(DynamicFieldsModelSerializer) :
     profile = ProfileSerializer()
     class Meta :
         model = User
-        fields = ('username', 'profile')
+        fields = ('id', 'username', 'is_staff', 'profile')
 
         # def __init__(self,)
 class LocationSerializer(serializers.ModelSerializer) :
@@ -47,7 +56,7 @@ class WriteCampSerializer(serializers.ModelSerializer) :
     # location = serializers.SlugRelatedField(slug_field='location_id', queryset=Location.objects.all())
     class Meta :
         model = Site
-        fields = ('location','name', 'note', 'address', 'is_state', 'created_at', 'updated_at')
+        fields = ('location','name', 'note', 'address', 'is_state', 'photo', 'created_at', 'updated_at')
 
 class ReadCampSerializer(DynamicFieldsModelSerializer) :
     """
@@ -58,7 +67,7 @@ class ReadCampSerializer(DynamicFieldsModelSerializer) :
     location = LocationSerializer()
     class Meta :
         model = Site
-        fields = ('name', 'note', 'address', 'is_state', 'created_at', 'updated_at','user','location')
+        fields = ('id','name', 'note', 'address', 'weather', 'is_state', 'photo', 'created_at', 'updated_at','user','location')
         read_only_fields = fields
     # def validate_email(self) :
     #     data = self.get_initial()

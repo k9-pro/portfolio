@@ -2,6 +2,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters import rest_framework as filters
+
 from .models import Site,Location
 from .serializers import ReadCampSerializer, WriteCampSerializer, LocationSerializer
 from drf_yasg.utils import swagger_auto_schema
@@ -23,7 +25,8 @@ class CampData(viewsets.ModelViewSet) :
         Debugger도구로 확인해 보면 다른 객체에 연결되어 있는 ForeignKey(id값)으로 조인으로 연결되어 있음을 할 수 있다.
     """
     queryset = Site.objects.select_related("user","location")
-    filter_backends = [SearchFilter, OrderingFilter]
+    filter_backends = [SearchFilter, OrderingFilter, filters.DjangoFilterBackend]
+    filterset_fields = ['location',] #지역 종속 필터
     search_fields = ['name','address','user__username','location__name']
     ordering_fields = ["created_at"]
     my_tags = ["캠핑장 정보"]
