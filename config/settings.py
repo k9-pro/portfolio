@@ -252,6 +252,7 @@ LOGIN_URL = '/accounts/login/'
 # CORS 관련 추가
 CORS_ORIGIN_WHITELIST = [
     'http://ec2-3-38-117-65.ap-northeast-2.compute.amazonaws.com',
+    'http://ec2-3-38-117-65.ap-northeast-2.compute.amazonaws.com:8000',
     'http://ec2-3-38-117-65.ap-northeast-2.compute.amazonaws.com:8080',
     'http://localhost:8080',
     'http://127.0.0.1:8080'
