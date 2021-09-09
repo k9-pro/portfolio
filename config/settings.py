@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'django_comment_migrate',
     # 'rest_auth',
     'django.contrib.sites',
-
+    'corsheaders', # CORS 관련 추가
     # allauth
     'allauth',
     'allauth.account',
@@ -67,6 +67,7 @@ AUTH_USER_MODEL = 'auth.User'
 SITE_ID = 1
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', # CORS 관련 추가
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -74,7 +75,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     # 'config.middleware.MoveJWTCookieIntoTheBody',
     # 'config.middleware.MoveJWTRefreshCookieIntoTheBody',
 ]
@@ -248,3 +248,10 @@ AUTHENTICATION_BACKENDS = (
 
 LOGIN_URL = '/accounts/login/'
 # LOGOUT_URL = '/rest-auth/logout/'
+
+# CORS 관련 추가
+CORS_ORIGIN_WHITELIST = [
+    'http://ec2-3-38-117-65.ap-northeast-2.compute.amazonaws.com',
+    'http://ec2-3-38-117-65.ap-northeast-2.compute.amazonaws.com:8080'
+]
+CORS_ALLOW_CREDENTIALS = True
