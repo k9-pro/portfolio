@@ -178,11 +178,15 @@ class CreatePostHitSerializer(serializers.ModelSerializer) :
         read_only_fields = ('ip',)
 
     def create(self, validated_data):
-        x_forwarded_for = self.context.get('request').META.get('HTTP_X_FORWARDED_FOR')
+        request = self.context.get('request')
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            validated_data['ip'] = x_forwarded_for.split(',')[0]
+            # validated_data['ip'] = x_forwarded_for.split(',')[0]
+            validated_data['ip'] = x_forwarded_for.split(',')[-1].strip()
+        elif request.META.get('HTTP_X_REAL_IP'):
+            validated_data['ip'] = request.META.get('HTTP_X_REAL_IP')
         else:
-            validated_data['ip'] = self.context.get('request').META.get("REMOTE_ADDR")
+            validated_data['ip'] = request.META.get("REMOTE_ADDR")
 
         return Post_hit.objects.create(**validated_data)
 
